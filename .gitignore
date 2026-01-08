@@ -1,0 +1,14 @@
+#ENV FILES
+.env 
+Backend/.env 
+
+#NODE MODULES
+node_modules
+Backend/node_modules/
+Frontend/node_modules/
+
+#UPLOADS
+Backend/upload
+
+#BUILDS  FILES
+Frontend/dist/
