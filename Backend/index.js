@@ -10,12 +10,15 @@ const app = express();
 
 // ================= MIDDLEWARE =================
 app.use(express.json());
+
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://splendid-cannoli-c14f9c.netlify.app", // your Netlify frontend
+      "https://effulgent-marshmallow-e10243.netlify.app"
     ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "auth-token"],
     credentials: true,
   })
 );
@@ -23,8 +26,11 @@ app.use(
 // ================= DATABASE =================
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
+  .then(() => console.log("MongoDB Connected ✅"))
+  .catch((err) => {
+    console.error("MongoDB Connection Failed ❌", err.message);
+    process.exit(1);
+  });
 
 // ================= TEST ROUTE =================
 app.get("/", (req, res) => {
@@ -61,28 +67,29 @@ const Product = mongoose.model("Product", {
   new_price: Number,
   old_price: Number,
   available: Boolean,
-  date: {
-    type: Date,
-    default: Date.now,
-  },
+  date: { type: Date, default: Date.now },
 });
 
 // ================= ADD PRODUCT =================
 app.post("/addproduct", async (req, res) => {
-  const products = await Product.find({});
-  const id = products.length ? products[products.length - 1].id + 1 : 1;
+  try {
+    const products = await Product.find({});
+    const id = products.length ? products[products.length - 1].id + 1 : 1;
 
-  const product = new Product({
-    id,
-    name: req.body.name,
-    image: req.body.image,
-    category: req.body.category,
-    new_price: req.body.new_price,
-    old_price: req.body.old_price,
-  });
+    const product = new Product({
+      id,
+      name: req.body.name,
+      image: req.body.image,
+      category: req.body.category,
+      new_price: req.body.new_price,
+      old_price: req.body.old_price,
+    });
 
-  await product.save();
-  res.json({ success: true, product });
+    await product.save();
+    res.json({ success: true, product });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ================= ALL PRODUCTS =================
@@ -94,8 +101,7 @@ app.get("/allproducts", async (req, res) => {
 // ================= NEW COLLECTIONS =================
 app.get("/newcollections", async (req, res) => {
   const products = await Product.find({});
-  const newCollections = products.slice(-8);
-  res.json(newCollections);
+  res.json(products.slice(-8));
 });
 
 // ================= POPULAR PRODUCTS =================
@@ -116,9 +122,7 @@ const Users = mongoose.model("Users", {
 // ================= AUTH =================
 app.post("/signup", async (req, res) => {
   const existing = await Users.findOne({ email: req.body.email });
-  if (existing) {
-    return res.status(400).json({ success: false });
-  }
+  if (existing) return res.json({ success: false });
 
   const cart = {};
   for (let i = 0; i < 300; i++) cart[i] = 0;
@@ -174,5 +178,5 @@ app.post("/getcart", fetchUser, async (req, res) => {
 // ================= SERVER =================
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on port ${PORT} 🚀`)
 );
