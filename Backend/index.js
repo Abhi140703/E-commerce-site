@@ -11,14 +11,10 @@ const app = express();
 // ================= MIDDLEWARE =================
 app.use(express.json());
 
+// ✅ SIMPLE & SAFE CORS (frontend + admin + testing)
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://effulgent-marshmallow-e10243.netlify.app"
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "auth-token"],
+    origin: true,
     credentials: true,
   })
 );
@@ -88,7 +84,17 @@ app.post("/addproduct", async (req, res) => {
     await product.save();
     res.json({ success: true, product });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ================= REMOVE PRODUCT =================
+app.post("/removeproduct", async (req, res) => {
+  try {
+    await Product.findOneAndDelete({ id: req.body.id });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false });
   }
 });
 
