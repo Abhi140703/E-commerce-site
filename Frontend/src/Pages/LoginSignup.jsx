@@ -9,12 +9,11 @@ const LoginSignup = () => {
     password: "",
   });
 
-  // handle input change
   const changeHandler = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // LOGIN FUNCTION
+  // LOGIN
   const login = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
@@ -28,6 +27,10 @@ const LoginSignup = () => {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error("Login request failed");
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -36,13 +39,13 @@ const LoginSignup = () => {
       } else {
         alert("Invalid email or password");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Login failed. Try again.");
+    } catch (err) {
+      alert("Login failed");
+      console.error(err);
     }
   };
 
-  // SIGNUP FUNCTION
+  // SIGNUP
   const signup = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/signup`, {
@@ -57,6 +60,10 @@ const LoginSignup = () => {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error("Signup request failed");
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -65,9 +72,9 @@ const LoginSignup = () => {
       } else {
         alert("User already exists");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Signup failed. Try again.");
+    } catch (err) {
+      alert("Signup failed");
+      console.error(err);
     }
   };
 
@@ -80,8 +87,8 @@ const LoginSignup = () => {
           {state === "Sign Up" && (
             <input
               type="text"
-              placeholder="Your Name"
               name="username"
+              placeholder="Your Name"
               value={formData.username}
               onChange={changeHandler}
             />
@@ -89,16 +96,16 @@ const LoginSignup = () => {
 
           <input
             type="email"
-            placeholder="Email Address"
             name="email"
+            placeholder="Email Address"
             value={formData.email}
             onChange={changeHandler}
           />
 
           <input
             type="password"
-            placeholder="Password"
             name="password"
+            placeholder="Password"
             value={formData.password}
             onChange={changeHandler}
           />
@@ -107,21 +114,16 @@ const LoginSignup = () => {
         <button onClick={state === "Login" ? login : signup}>Continue</button>
 
         {state === "Login" ? (
-          <p className="loginsignup-login">
+          <p>
             Create an account?{" "}
             <span onClick={() => setState("Sign Up")}>Click here</span>
           </p>
         ) : (
-          <p className="loginsignup-login">
+          <p>
             Already have an account?{" "}
             <span onClick={() => setState("Login")}>Login here</span>
           </p>
         )}
-
-        <div className="loginsignup-agree">
-          <input type="checkbox" />
-          <p>By continuing, I agree to the terms of use & privacy policy</p>
-        </div>
       </div>
     </div>
   );
