@@ -108,9 +108,37 @@ app.post("/addproduct", async (req, res) => {
 });
 
 /* ================= LIST ================= */
+/* ============== LIST PRODUCTS ============== */
 app.get("/allproducts", async (req, res) => {
-  res.json(await Product.find({}));
+  try {
+    const products = await Product.find({});
+    res.json(products);
+  } catch (err) {
+    res.status(500).json([]);
+  }
 });
+ /* ============== POPULAR PRODUCTS ============== */
+app.get("/popularproducts", async (req, res) => {
+  try {
+    const products = await Product.find({}).limit(8);
+    res.json(products);
+  } catch (err) {
+    res.status(500).json([]);
+  }
+});
+
+/* ============== NEW COLLECTIONS ============== */
+app.get("/newcollections", async (req, res) => {
+  try {
+    const products = await Product.find({})
+      .sort({ date: -1 })
+      .limit(8);
+    res.json(products);
+  } catch (err) {
+    res.status(500).json([]);
+  }
+});
+
 
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 4000;
