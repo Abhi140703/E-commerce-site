@@ -8,11 +8,11 @@ require("dotenv").config();
 
 const app = express();
 
-/* ============== MIDDLEWARE ============== */
+/* ================= MIDDLEWARE ================= */
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
 
-/* ============== DATABASE ============== */
+/* ================= DATABASE ================= */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected ✅"))
@@ -21,7 +21,7 @@ mongoose
     process.exit(1);
   });
 
-/* ============== CLOUDINARY ============== */
+/* ================= CLOUDINARY ================= */
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -38,27 +38,36 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
-/* ============== TEST ============== */
+/* ================= TEST ================= */
 app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
 
-/* ============== UPLOAD (FIXED) ============== */
+/* ================= UPLOAD ================= */
 app.post("/upload", upload.single("product"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    return res.json({
+      success: true,
+      image_url: req.file.path, // Cloudinary URL
+    });
+  } catch (err) {
+    console.error("UPLOAD ERROR 👉", err);
+    return res.status(500).json({
       success: false,
-      message: "No file uploaded",
+      message: "Upload crashed",
+      error: err.message,
     });
   }
-
-  res.json({
-    success: true,
-    image_url: req.file.path, // Cloudinary URL
-  });
 });
 
-/* ============== PRODUCT MODEL ============== */
+/* ================= PRODUCT MODEL ================= */
 const Product = mongoose.model("Product", {
   id: Number,
   name: String,
@@ -69,7 +78,7 @@ const Product = mongoose.model("Product", {
   date: { type: Date, default: Date.now },
 });
 
-/* ============== ADD PRODUCT ============== */
+/* ================= ADD PRODUCT ================= */
 app.post("/addproduct", async (req, res) => {
   try {
     const products = await Product.find({});
@@ -87,17 +96,27 @@ app.post("/addproduct", async (req, res) => {
     await product.save();
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error("ADD PRODUCT ERROR 👉", err);
     res.status(500).json({ success: false });
   }
 });
 
-/* ============== LIST PRODUCTS ============== */
+/* ================= LIST PRODUCTS ================= */
 app.get("/allproducts", async (req, res) => {
   res.json(await Product.find({}));
 });
 
-/* ============== SERVER ============== */
+/* ================= GLOBAL ERROR HANDLER ================= */
+app.use((err, req, res, next) => {
+  console.error("GLOBAL ERROR 👉", err);
+  res.status(500).json({
+    success: false,
+    message: "Server error",
+    error: err.message,
+  });
+});
+
+/* ================= SERVER ================= */
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () =>
   console.log(`Server running on ${PORT} 🚀`)
