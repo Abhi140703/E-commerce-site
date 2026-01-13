@@ -7,7 +7,6 @@ const AddProduct = () => {
 
   const [productDetails, setProductDetails] = useState({
     name: "",
-    image: "",
     category: "Women",
     new_price: "",
     old_price: "",
@@ -26,7 +25,12 @@ const AddProduct = () => {
 
   const Add_Product = async () => {
     try {
-      // 1️⃣ Upload image
+      if (!image) {
+        alert("Please select an image");
+        return;
+      }
+
+      // 🔹 1. Upload image
       const formData = new FormData();
       formData.append("product", image);
 
@@ -42,12 +46,16 @@ const AddProduct = () => {
         return;
       }
 
-      // 2️⃣ Add product
+      // 🔹 2. Prepare product (IMPORTANT FIXES HERE)
       const product = {
-        ...productDetails,
-        image: uploadData.image_url,
+        name: productDetails.name,
+        category: productDetails.category,
+        image: uploadData.image_url, // ✅ FULL IMAGE URL
+        new_price: Number(productDetails.new_price), // ✅ NUMBER
+        old_price: Number(productDetails.old_price), // ✅ NUMBER
       };
 
+      // 🔹 3. Add product
       const productRes = await fetch(
         `${import.meta.env.VITE_API_URL}/addproduct`,
         {
@@ -61,9 +69,20 @@ const AddProduct = () => {
 
       const productData = await productRes.json();
 
-      productData.success
-        ? alert("Product Added Successfully ✅")
-        : alert("Failed to add product ❌");
+      if (productData.success) {
+        alert("Product Added Successfully ✅");
+
+        // reset form
+        setProductDetails({
+          name: "",
+          category: "Women",
+          new_price: "",
+          old_price: "",
+        });
+        setImage(null);
+      } else {
+        alert("Failed to add product ❌");
+      }
     } catch (error) {
       console.error(error);
       alert("Something went wrong");
@@ -85,7 +104,7 @@ const AddProduct = () => {
 
       <div className="addproduct-price">
         <div className="addproduct-itemfield">
-          <p>Price</p>
+          <p>Old Price</p>
           <input
             type="text"
             name="old_price"
@@ -96,7 +115,7 @@ const AddProduct = () => {
         </div>
 
         <div className="addproduct-itemfield">
-          <p>Offer Price</p>
+          <p>New Price</p>
           <input
             type="text"
             name="new_price"
