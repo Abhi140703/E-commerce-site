@@ -30,14 +30,17 @@ const AddProduct = () => {
         return;
       }
 
-      // 🔹 1. Upload image
+      // 1️⃣ Upload image
       const formData = new FormData();
       formData.append("product", image);
 
-      const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      const uploadRes = await fetch(
+        `${import.meta.env.VITE_API_URL}/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const uploadData = await uploadRes.json();
 
@@ -46,16 +49,16 @@ const AddProduct = () => {
         return;
       }
 
-      // 🔹 2. Prepare product (IMPORTANT FIXES HERE)
+      // 2️⃣ Prepare product
       const product = {
         name: productDetails.name,
         category: productDetails.category,
-        image: uploadData.image_url, // ✅ FULL IMAGE URL
-        new_price: Number(productDetails.new_price), // ✅ NUMBER
-        old_price: Number(productDetails.old_price), // ✅ NUMBER
+        image: uploadData.image_url,
+        new_price: Number(productDetails.new_price),
+        old_price: Number(productDetails.old_price),
       };
 
-      // 🔹 3. Add product
+      // 3️⃣ Add product
       const productRes = await fetch(
         `${import.meta.env.VITE_API_URL}/addproduct`,
         {
@@ -72,7 +75,6 @@ const AddProduct = () => {
       if (productData.success) {
         alert("Product Added Successfully ✅");
 
-        // reset form
         setProductDetails({
           name: "",
           category: "Women",
@@ -149,7 +151,15 @@ const AddProduct = () => {
             className="addproduct-thumbnail-img"
           />
         </label>
-        <input type="file" id="file-input" hidden onChange={imageHandler} />
+
+        {/* 🔴 ONLY FIX IS HERE */}
+        <input
+          type="file"
+          id="file-input"
+          name="product"
+          hidden
+          onChange={imageHandler}
+        />
       </div>
 
       <button onClick={Add_Product} className="addproduct-btn">

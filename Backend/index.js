@@ -1,6 +1,5 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
@@ -9,11 +8,11 @@ require("dotenv").config();
 
 const app = express();
 
-/* ================= MIDDLEWARE ================= */
+/* ============== MIDDLEWARE ============== */
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
 
-/* ================= DATABASE ================= */
+/* ============== DATABASE ============== */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected ✅"))
@@ -22,7 +21,7 @@ mongoose
     process.exit(1);
   });
 
-/* ================= CLOUDINARY ================= */
+/* ============== CLOUDINARY ============== */
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -33,45 +32,33 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "ecommerce_products",
-    resource_type: "image",
     allowed_formats: ["jpg", "jpeg", "png"],
   },
 });
 
 const upload = multer({ storage });
 
-/* ================= TEST ================= */
+/* ============== TEST ============== */
 app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
 
-/* ================= UPLOAD ================= */
-app.post("/upload", (req, res) => {
-  upload.single("product")(req, res, (err) => {
-    if (err) {
-      console.error("Multer error:", err);
-      return res.status(500).json({
-        success: false,
-        message: "Upload failed",
-        error: err.message,
-      });
-    }
-
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "No file uploaded",
-      });
-    }
-
-    res.json({
-      success: true,
-      image_url: req.file.path, // Cloudinary URL
+/* ============== UPLOAD (FIXED) ============== */
+app.post("/upload", upload.single("product"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      message: "No file uploaded",
     });
+  }
+
+  res.json({
+    success: true,
+    image_url: req.file.path, // Cloudinary URL
   });
 });
 
-/* ================= PRODUCT ================= */
+/* ============== PRODUCT MODEL ============== */
 const Product = mongoose.model("Product", {
   id: Number,
   name: String,
@@ -82,6 +69,7 @@ const Product = mongoose.model("Product", {
   date: { type: Date, default: Date.now },
 });
 
+/* ============== ADD PRODUCT ============== */
 app.post("/addproduct", async (req, res) => {
   try {
     const products = await Product.find({});
@@ -104,12 +92,12 @@ app.post("/addproduct", async (req, res) => {
   }
 });
 
-/* ================= LIST ================= */
+/* ============== LIST PRODUCTS ============== */
 app.get("/allproducts", async (req, res) => {
   res.json(await Product.find({}));
 });
 
-/* ================= SERVER ================= */
+/* ============== SERVER ============== */
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () =>
   console.log(`Server running on ${PORT} 🚀`)
