@@ -3,14 +3,13 @@ const mongoose = require("mongoose");
 const multer = require("multer");
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 require("dotenv").config();
 
 const app = express();
 
 /* ================= MIDDLEWARE ================= */
+app.use(cors({ origin: true }));
 app.use(express.json());
-app.use(cors({ origin: true, credentials: true }));
 
 /* ================= DATABASE ================= */
 mongoose
@@ -28,40 +27,47 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "ecommerce_products",
-    allowed_formats: ["jpg", "jpeg", "png"],
-  },
+/* ================= MULTER (MEMORY STORAGE) ================= */
+const upload = multer({
+  storage: multer.memoryStorage(),
 });
-
-const upload = multer({ storage });
 
 /* ================= TEST ================= */
 app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
 
-/* ================= UPLOAD ================= */
-app.post("/upload", upload.single("product"), (req, res) => {
+/* ================= UPLOAD (STABLE FIX) ================= */
+app.post("/upload", upload.single("product"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "No file uploaded",
+        message: "No file received",
       });
     }
 
-    return res.json({
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: "ecommerce_products" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+
+      stream.end(req.file.buffer);
+    });
+
+    res.json({
       success: true,
-      image_url: req.file.path, // Cloudinary URL
+      image_url: result.secure_url,
     });
   } catch (err) {
     console.error("UPLOAD ERROR 👉", err);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: "Upload crashed",
+      message: "Upload failed",
       error: err.message,
     });
   }
@@ -101,19 +107,9 @@ app.post("/addproduct", async (req, res) => {
   }
 });
 
-/* ================= LIST PRODUCTS ================= */
+/* ================= LIST ================= */
 app.get("/allproducts", async (req, res) => {
   res.json(await Product.find({}));
-});
-
-/* ================= GLOBAL ERROR HANDLER ================= */
-app.use((err, req, res, next) => {
-  console.error("GLOBAL ERROR 👉", err);
-  res.status(500).json({
-    success: false,
-    message: "Server error",
-    error: err.message,
-  });
 });
 
 /* ================= SERVER ================= */
