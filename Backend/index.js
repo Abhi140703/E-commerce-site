@@ -34,11 +34,13 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+/* 🔴 FIX IS HERE */
 const storage = new CloudinaryStorage({
-  cloudinary,
+  cloudinary: cloudinary,
   params: {
     folder: "ecommerce_products",
-    allowed_formats: ["jpg", "jpeg", "png"],
+    resource_type: "image", // ✅ REQUIRED
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });
 
