@@ -1,87 +1,124 @@
-.footer{
+.footer {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 50px;
+    gap: 40px;
+    padding-top: 60px;
 }
-.footer-logo{
+
+/* -------- LOGO -------- */
+
+.footer-logo {
     display: flex;
     align-items: center;
-    gap: 20px;
-
+    gap: 16px;
 }
-.footer-logo p{
+
+.footer-logo img {
+    width: 120px;
+}
+
+.footer-logo p {
     color: #383838;
-    font-size: 46px;
+    font-size: 38px;
     font-weight: 700;
-
 }
-.footer-links{
+
+/* -------- LINKS -------- */
+
+.footer-links {
     display: flex;
     list-style: none;
-    gap: 50px;
+    gap: 40px;
     color: #252525;
-    font-size: 20px;
-
+    font-size: 18px;
 }
-.footer-links li{
+
+.footer-links li {
     cursor: pointer;
+    transition: color 0.2s ease;
 }
-.footer-social-icon{
-    display: flex;
-    gap: 20px;
 
+.footer-links li:hover {
+    color: #ff5a5a;
 }
-.footer-icon-container{
+
+/* -------- SOCIAL ICONS -------- */
+
+.footer-social-icon {
+    display: flex;
+    gap: 16px;
+}
+
+.footer-icon-container {
     padding: 10px;
-    padding-bottom: 6px;
     background-color: #fbfbfb;
     border: 1px solid #ebebee;
-
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.footer-copyright{
+
+.footer-icon-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* -------- COPYRIGHT -------- */
+
+.footer-copyright {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 30px;
+    gap: 24px;
     width: 100%;
     margin-bottom: 30px;
     color: #1a1a1a;
-    font-size: 20px;
+    font-size: 16px;
 }
-.footer-copyright hr{
+
+.footer-copyright hr {
     width: 80%;
     border: none;
     border-radius: 10px;
-    height: 3px;
+    height: 2px;
     background: #c7c7c7;
 }
-.footer-logo img{
-    width: 150px;
-}
-@media (max-width:800px){
-    .footer{
-        gap: 20px;
+
+/* -------- RESPONSIVE -------- */
+
+@media (max-width: 800px) {
+    .footer {
+        gap: 24px;
+        padding-top: 40px;
     }
-    .footer-logo{
+
+    .footer-logo {
         gap: 10px;
-        align-items: end;
     }
-    .footer-logo img{
-        width: 40px;
+
+    .footer-logo img {
+        width: 48px;
     }
-    .footer-logo p{
-        font-size: 25px;
+
+    .footer-logo p {
+        font-size: 24px;
     }
-    .footer-links{
+
+    .footer-links {
         font-size: 14px;
-        gap: 10px;
+        gap: 14px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
-    .footer-social-icon{
-        width: 22px;
+
+    .footer-social-icon {
+        gap: 12px;
     }
-    .footer-copyright{
+
+    .footer-copyright {
         font-size: 13px;
+        gap: 18px;
     }
 }
