@@ -140,6 +140,55 @@ app.post("/login", async (req, res) => {
 });
 
 
+app.post("/getcart", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ cart: {} });
+    }
+
+    res.json({ cart: user.cart });
+  } catch (err) {
+    res.status(500).json({ cart: {} });
+  }
+});
+
+app.post("/addtocart", async (req, res) => {
+  try {
+    const { email, itemId } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ success: false });
+
+    user.cart[itemId] = (user.cart[itemId] || 0) + 1;
+    await user.save();
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false });
+  }
+});
+
+app.post("/removefromcart", async (req, res) => {
+  try {
+    const { email, itemId } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ success: false });
+
+    if (user.cart[itemId] > 0) {
+      user.cart[itemId] -= 1;
+    }
+
+    await user.save();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false });
+  }
+});
+
 
 /* ================= ADD PRODUCT ================= */
 app.post("/addproduct", async (req, res) => {
