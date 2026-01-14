@@ -8,7 +8,7 @@ require("dotenv").config();
 const app = express();
 
 /* ================= MIDDLEWARE ================= */
-app.use(cors({ origin: true }));
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
 /* ================= DATABASE ================= */
@@ -27,24 +27,19 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-/* ================= MULTER (MEMORY STORAGE) ================= */
-const upload = multer({
-  storage: multer.memoryStorage(),
-});
+/* ================= MULTER ================= */
+const upload = multer({ storage: multer.memoryStorage() });
 
 /* ================= TEST ================= */
 app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
 
-/* ================= UPLOAD (STABLE FIX) ================= */
+/* ================= IMAGE UPLOAD ================= */
 app.post("/upload", upload.single("product"), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "No file received",
-      });
+      return res.status(400).json({ success: false });
     }
 
     const result = await new Promise((resolve, reject) => {
@@ -55,21 +50,13 @@ app.post("/upload", upload.single("product"), async (req, res) => {
           else resolve(result);
         }
       );
-
       stream.end(req.file.buffer);
     });
 
-    res.json({
-      success: true,
-      image_url: result.secure_url,
-    });
+    res.json({ success: true, image_url: result.secure_url });
   } catch (err) {
-    console.error("UPLOAD ERROR 👉", err);
-    res.status(500).json({
-      success: false,
-      message: "Upload failed",
-      error: err.message,
-    });
+    console.error(err);
+    res.status(500).json({ success: false });
   }
 });
 
@@ -83,35 +70,36 @@ const Product = mongoose.model("Product", {
   old_price: Number,
   date: { type: Date, default: Date.now },
 });
-  
 
+/* ================= USER MODEL (FIXED) ================= */
 const User = mongoose.model("User", {
   name: String,
   email: { type: String, unique: true },
   password: String,
+  cart: {
+    type: Object,
+    default: {},
+  },
 });
-  
 
+/* ================= SIGNUP ================= */
 app.post("/signup", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exists",
-      });
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ success: false, message: "User exists" });
     }
 
     const user = new User({
       name,
       email,
-      password, // (plain for now — OK for learning)
+      password,
+      cart: {},
     });
 
     await user.save();
-
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -119,17 +107,14 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-
+/* ================= LOGIN ================= */
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user || user.password !== password) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid credentials",
-      });
+      return res.status(400).json({ success: false });
     }
 
     res.json({ success: true });
@@ -139,34 +124,27 @@ app.post("/login", async (req, res) => {
   }
 });
 
-
+/* ================= CART ================= */
 app.post("/getcart", async (req, res) => {
   try {
     const { email } = req.body;
-
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ cart: {} });
-    }
-
-    res.json({ cart: user.cart });
-  } catch (err) {
-    res.status(500).json({ cart: {} });
+    res.json({ cart: user?.cart || {} });
+  } catch {
+    res.json({ cart: {} });
   }
 });
 
 app.post("/addtocart", async (req, res) => {
   try {
     const { email, itemId } = req.body;
-
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ success: false });
 
     user.cart[itemId] = (user.cart[itemId] || 0) + 1;
     await user.save();
-
     res.json({ success: true });
-  } catch (err) {
+  } catch {
     res.status(500).json({ success: false });
   }
 });
@@ -174,21 +152,16 @@ app.post("/addtocart", async (req, res) => {
 app.post("/removefromcart", async (req, res) => {
   try {
     const { email, itemId } = req.body;
-
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ success: false });
 
-    if (user.cart[itemId] > 0) {
-      user.cart[itemId] -= 1;
-    }
-
+    if (user.cart[itemId] > 0) user.cart[itemId] -= 1;
     await user.save();
     res.json({ success: true });
-  } catch (err) {
+  } catch {
     res.status(500).json({ success: false });
   }
 });
-
 
 /* ================= ADD PRODUCT ================= */
 app.post("/addproduct", async (req, res) => {
@@ -208,46 +181,26 @@ app.post("/addproduct", async (req, res) => {
     await product.save();
     res.json({ success: true });
   } catch (err) {
-    console.error("ADD PRODUCT ERROR 👉", err);
+    console.error(err);
     res.status(500).json({ success: false });
   }
 });
 
-/* ================= LIST ================= */
-/* ============== LIST PRODUCTS ============== */
+/* ================= PRODUCTS ================= */
 app.get("/allproducts", async (req, res) => {
-  try {
-    const products = await Product.find({});
-    res.json(products);
-  } catch (err) {
-    res.status(500).json([]);
-  }
+  res.json(await Product.find({}));
 });
- /* ============== POPULAR PRODUCTS ============== */
+
 app.get("/popularproducts", async (req, res) => {
-  try {
-    const products = await Product.find({}).limit(8);
-    res.json(products);
-  } catch (err) {
-    res.status(500).json([]);
-  }
+  res.json(await Product.find({}).limit(8));
 });
 
-/* ============== NEW COLLECTIONS ============== */
 app.get("/newcollections", async (req, res) => {
-  try {
-    const products = await Product.find({})
-      .sort({ date: -1 })
-      .limit(8);
-    res.json(products);
-  } catch (err) {
-    res.status(500).json([]);
-  }
+  res.json(await Product.find({}).sort({ date: -1 }).limit(8));
 });
-
 
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () =>
-  console.log(`Server running on ${PORT} 🚀`)
-);
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT} 🚀`);
+});
