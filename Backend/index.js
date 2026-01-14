@@ -83,6 +83,63 @@ const Product = mongoose.model("Product", {
   old_price: Number,
   date: { type: Date, default: Date.now },
 });
+  
+
+const User = mongoose.model("User", {
+  name: String,
+  email: { type: String, unique: true },
+  password: String,
+});
+  
+
+app.post("/signup", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
+
+    const user = new User({
+      name,
+      email,
+      password, // (plain for now — OK for learning)
+    });
+
+    await user.save();
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user || user.password !== password) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
+
 
 /* ================= ADD PRODUCT ================= */
 app.post("/addproduct", async (req, res) => {
