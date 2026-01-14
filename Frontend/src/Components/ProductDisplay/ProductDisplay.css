@@ -203,3 +203,21 @@
         font-size: 14px;
     }
 }
+.size-box {
+  padding: 10px 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.size-box:hover {
+  border-color: #ff4141;
+}
+
+.active-size {
+  background-color: #ff4141;
+  color: white;
+  border-color: #ff4141;
+}

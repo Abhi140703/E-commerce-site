@@ -125,7 +125,7 @@
 
 @media (max-width: 500px) {
     .newsletter {
-        width: 100%;
+        width: 90%;
         padding: 30px 16px;
         border-radius: 0;
         margin-bottom: 60px;
