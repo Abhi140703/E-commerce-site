@@ -128,12 +128,18 @@ app.post("/login", async (req, res) => {
 app.post("/getcart", async (req, res) => {
   try {
     const { email } = req.body;
+
+    if (!email) {
+      return res.json({ cart: {} });
+    }
+
     const user = await User.findOne({ email });
-    res.json({ cart: user?.cart || {} });
-  } catch {
-    res.json({ cart: {} });
+    return res.json({ cart: user?.cart || {} });
+  } catch (err) {
+    return res.json({ cart: {} });
   }
 });
+
 
 app.post("/addtocart", async (req, res) => {
   try {
