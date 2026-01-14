@@ -221,3 +221,8 @@
   color: white;
   border-color: #ff4141;
 }
+
+.disabled-btn {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

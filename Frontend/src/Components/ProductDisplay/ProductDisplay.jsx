@@ -58,12 +58,15 @@ const ProductDisplay = (props) => {
           </div>
         </div>
         <button
+          disabled={!selectedSize}
           onClick={() => {
-            addToCart(product.id);
+            addToCart(product._id, selectedSize);
           }}
+          className={!selectedSize ? "disabled-btn" : ""}
         >
           ADD TO CART
         </button>
+
         <p className="productdisplay-right-category">
           <span>Category :</span>
           {product?.category || "N/A"}
