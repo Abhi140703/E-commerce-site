@@ -9,7 +9,15 @@ import RelatedProducts from "../Components/RelatedProducts/RelatedProducts";
 const Product = () => {
   const { all_product } = useContext(ShopContext);
   const { productId } = useParams();
-  const product = all_product.find((e) => e._id === Number(productId));
+
+  // ✅ FIXED (_id is a string)
+  const product = all_product.find((e) => e._id === productId);
+
+  // ✅ CRITICAL GUARD (prevents white screen)
+  if (!product) {
+    return <div style={{ padding: "40px" }}>Loading product...</div>;
+  }
+
   return (
     <div>
       <Breadcrum product={product} />
