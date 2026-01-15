@@ -37,7 +37,7 @@ app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
 
-/* ================= UPLOAD (STABLE FIX) ================= */
+/* ================= UPLOAD ================= */
 app.post("/upload", upload.single("product"), async (req, res) => {
   try {
     if (!req.file) {
@@ -154,19 +154,25 @@ app.post("/getcart", async (req, res) => {
 });
 
 
-app.post("/addtocart", async (req, res) => {
-  try {
-    const { email, itemId } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ success: false });
+app.post("/addtocart", fetchUser, async (req, res) => {
+  const { itemId } = req.body;
 
-    user.cart[itemId] = (user.cart[itemId] || 0) + 1;
-    await user.save();
-    res.json({ success: true });
-  } catch {
-    res.status(500).json({ success: false });
+  if (!itemId) {
+    return res.status(400).json({ error: "Item ID missing" });
   }
+
+  let userData = await Users.findOne({ _id: req.user.id });
+
+  if (!userData.cartData) {
+    userData.cartData = {};
+  }
+
+  userData.cartData[itemId] = (userData.cartData[itemId] || 0) + 1;
+
+  await userData.save();
+  res.json({ success: true });
 });
+
 
 app.post("/removefromcart", async (req, res) => {
   try {
