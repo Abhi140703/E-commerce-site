@@ -25,7 +25,7 @@ const ShopCategory = (props) => {
       </div>
 
       <div className="shopcategory-products">
-        {all_products
+        {all_product
           .filter((item) => item.category === props.category) // ✅ CLEAN FILTER
           .map((item) => (
             <Item
