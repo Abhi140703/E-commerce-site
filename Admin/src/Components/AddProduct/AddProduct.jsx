@@ -34,13 +34,10 @@ const AddProduct = () => {
       const formData = new FormData();
       formData.append("product", image);
 
-      const uploadRes = await fetch(
-        `${import.meta.env.VITE_API_URL}/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
+        method: "POST",
+        body: formData,
+      });
 
       const uploadData = await uploadRes.json();
 
@@ -152,7 +149,6 @@ const AddProduct = () => {
           />
         </label>
 
-        {/* 🔴 ONLY FIX IS HERE */}
         <input
           type="file"
           id="file-input"

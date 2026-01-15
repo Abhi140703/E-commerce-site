@@ -37,7 +37,6 @@
 @media (max-width: 500px) {
     .breadcrum {
         margin: 16px 12px;
-        font-size: 11px;           /* avoid too tiny text */
-        flex-wrap: wrap;           /* prevents overflow */
-    }
+        font-size: 11px;           
+        flex-wrap: wrap;             }
 }

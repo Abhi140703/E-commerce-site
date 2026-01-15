@@ -95,7 +95,12 @@ const ShopContextProvider = (props) => {
 
   /* ================= TOTAL CART ITEMS ================= */
   const getTotalCartItems = () => {
-    return Object.values(cartItems).reduce((total, qty) => total + qty, 0);
+    let total = 0;
+    for (const key in cartItems) {
+      const value = cartItems[key];
+      total += typeof value === "number" ? value : value.quantity || 0;
+    }
+    return total;
   };
 
   /* ================= CONTEXT VALUE ================= */

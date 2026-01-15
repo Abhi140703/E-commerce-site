@@ -25,18 +25,16 @@ const ShopCategory = (props) => {
       </div>
 
       <div className="shopcategory-products">
-        {all_product
-          .filter((item) => item.category === props.category) // ✅ CLEAN FILTER
-          .map((item) => (
-            <Item
-              key={item._id}
-              id={item._id}
-              name={item.name}
-              image={item.image}
-              new_price={item.new_price}
-              old_price={item.old_price}
-            />
-          ))}
+        {filteredProducts.map((item) => (
+          <Item
+            key={item._id}
+            id={item._id}
+            name={item.name}
+            image={item.image}
+            new_price={item.new_price}
+            old_price={item.old_price}
+          />
+        ))}
       </div>
 
       <div className="shopcategory-loadmore">Explore More</div>
