@@ -65,7 +65,7 @@ const ListProduct = () => {
                 src={cross_icon}
                 alt=""
                 className="listproduct-remove-icon"
-                onClick={() => remove_product(product.id)}
+                onClick={() => remove_product(product._id)}
               />
             </div>
             <hr />

@@ -187,7 +187,7 @@ app.post("/removefromcart", async (req, res) => {
 app.post("/addproduct", async (req, res) => {
   try {
     const products = await Product.find({});
-    const id = products.length ? products[products.length - 1].id + 1 : 1;
+    const id = products.length ? products[products.length - 1]._id + 1 : 1;
 
     const product = new Product({
       id,
