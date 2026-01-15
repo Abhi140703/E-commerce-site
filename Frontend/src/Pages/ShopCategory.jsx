@@ -5,10 +5,9 @@ import dropdown_icon from "../Components/Assets/dropdown_icon.png";
 import Item from "../Components/Item/Item";
 
 const ShopCategory = (props) => {
-  const { all_products } = useContext(ShopContext); // ✅ FIXED
-  const filteredProducts = all_products.filter(
-    (item) => item.category === props.category
-  );
+  const { all_product } = useContext(ShopContext); // ✅ FIXED
+  const filteredProducts =
+    all_product?.filter((item) => item.category === props.category) || [];
 
   return (
     <div className="shop-category">
@@ -30,8 +29,8 @@ const ShopCategory = (props) => {
           .filter((item) => item.category === props.category) // ✅ CLEAN FILTER
           .map((item) => (
             <Item
-              key={item.id}
-              id={item.id}
+              key={item._id}
+              id={item._id}
               name={item.name}
               image={item.image}
               new_price={item.new_price}
