@@ -3,7 +3,10 @@ const mongoose = require("mongoose");
 const multer = require("multer");
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
+
+const fetchUser = require("./middleware/fetchUser");
 
 const app = express();
 
@@ -27,7 +30,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-/* ================= MULTER (MEMORY STORAGE) ================= */
+/* ================= MULTER ================= */
 const upload = multer({
   storage: multer.memoryStorage(),
 });
@@ -37,45 +40,8 @@ app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
 
-/* ================= UPLOAD ================= */
-app.post("/upload", upload.single("product"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "No file received",
-      });
-    }
-
-    const result = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: "ecommerce_products" },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
-
-      stream.end(req.file.buffer);
-    });
-
-    res.json({
-      success: true,
-      image_url: result.secure_url,
-    });
-  } catch (err) {
-    console.error("UPLOAD ERROR 👉", err);
-    res.status(500).json({
-      success: false,
-      message: "Upload failed",
-      error: err.message,
-    });
-  }
-});
-
 /* ================= PRODUCT MODEL ================= */
 const Product = mongoose.model("Product", {
-  id: Number,
   name: String,
   image: String,
   category: String,
@@ -84,7 +50,7 @@ const Product = mongoose.model("Product", {
   date: { type: Date, default: Date.now },
 });
 
-/* ================= USER MODEL (FIXED) ================= */
+/* ================= USER MODEL ================= */
 const User = mongoose.model("User", {
   name: String,
   email: { type: String, unique: true },
@@ -93,6 +59,26 @@ const User = mongoose.model("User", {
     type: Object,
     default: {},
   },
+});
+
+/* ================= IMAGE UPLOAD ================= */
+app.post("/upload", upload.single("product"), async (req, res) => {
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: "ecommerce_products" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      stream.end(req.file.buffer);
+    });
+
+    res.json({ success: true, image_url: result.secure_url });
+  } catch (err) {
+    res.status(500).json({ success: false });
+  }
 });
 
 /* ================= SIGNUP ================= */
@@ -105,17 +91,14 @@ app.post("/signup", async (req, res) => {
       return res.status(400).json({ success: false, message: "User exists" });
     }
 
-    const user = new User({
-      name,
-      email,
-      password,
-      cart: {},
-    });
-
+    const user = new User({ name, email, password });
     await user.save();
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
+
+    const data = { user: { id: user.id } };
+    const token = jwt.sign(data, process.env.JWT_SECRET);
+
+    res.json({ success: true, token });
+  } catch {
     res.status(500).json({ success: false });
   }
 });
@@ -130,123 +113,90 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ success: false });
     }
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
+    const data = { user: { id: user.id } };
+    const token = jwt.sign(data, process.env.JWT_SECRET);
+
+    res.json({ success: true, token });
+  } catch {
     res.status(500).json({ success: false });
   }
 });
 
-/* ================= CART ================= */
-app.post("/getcart", async (req, res) => {
+/* ================= GET CART ================= */
+app.post("/getcart", fetchUser, async (req, res) => {
   try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.json({ cart: {} });
-    }
-
-    const user = await User.findOne({ email });
-    return res.json({ cart: user?.cart || {} });
-  } catch (err) {
-    return res.json({ cart: {} });
+    const user = await User.findById(req.user.id);
+    res.json(user?.cart || {});
+  } catch {
+    res.status(500).json({});
   }
 });
 
-
+/* ================= ADD TO CART ================= */
 app.post("/addtocart", fetchUser, async (req, res) => {
-  const { itemId } = req.body;
+  try {
+    const { itemId } = req.body;
+    if (!itemId) return res.status(400).json({ error: "Item ID missing" });
 
-  if (!itemId) {
-    return res.status(400).json({ error: "Item ID missing" });
+    const user = await User.findById(req.user.id);
+    user.cart[itemId] = (user.cart[itemId] || 0) + 1;
+
+    await user.save();
+    res.json({ success: true, cart: user.cart });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
   }
-
-  let userData = await Users.findOne({ _id: req.user.id });
-
-  if (!userData.cartData) {
-    userData.cartData = {};
-  }
-
-  userData.cartData[itemId] = (userData.cartData[itemId] || 0) + 1;
-
-  await userData.save();
-  res.json({ success: true });
 });
 
-
-app.post("/removefromcart", async (req, res) => {
+/* ================= REMOVE FROM CART ================= */
+app.post("/removefromcart", fetchUser, async (req, res) => {
   try {
-    const { email, itemId } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ success: false });
+    const { itemId } = req.body;
+    const user = await User.findById(req.user.id);
 
-    if (user.cart[itemId] > 0) user.cart[itemId] -= 1;
+    if (!user.cart[itemId]) return res.json({ success: false });
+
+    user.cart[itemId] -= 1;
+    if (user.cart[itemId] <= 0) delete user.cart[itemId];
+
     await user.save();
+    res.json({ success: true, cart: user.cart });
+  } catch {
+    res.status(500).json({ success: false });
+  }
+});
+
+/* ================= ADD PRODUCT ================= */
+app.post("/addproduct", async (req, res) => {
+  try {
+    const product = new Product(req.body);
+    await product.save();
     res.json({ success: true });
   } catch {
     res.status(500).json({ success: false });
   }
 });
 
-
-/* ================= ADD PRODUCT ================= */
-app.post("/addproduct", async (req, res) => {
-  try {
-    const products = await Product.find({});
-    const id = products.length ? products[products.length - 1]._id + 1 : 1;
-
-    const product = new Product({
-      id,
-      name: req.body.name,
-      image: req.body.image,
-      category: req.body.category,
-      new_price: Number(req.body.new_price),
-      old_price: Number(req.body.old_price),
-    });
-
-    await product.save();
-    res.json({ success: true });
-  } catch (err) {
-    console.error("ADD PRODUCT ERROR 👉", err);
-    res.status(500).json({ success: false });
-  }
-});
-
-/* ================= LIST ================= */
-/* ============== LIST PRODUCTS ============== */
+/* ================= LIST PRODUCTS ================= */
 app.get("/allproducts", async (req, res) => {
-  try {
-    const products = await Product.find({});
-    res.json(products);
-  } catch (err) {
-    res.status(500).json([]);
-  }
+  const products = await Product.find({});
+  res.json(products);
 });
- /* ============== POPULAR PRODUCTS ============== */
+
 app.get("/popularproducts", async (req, res) => {
-  try {
-    const products = await Product.find({}).limit(8);
-    res.json(products);
-  } catch (err) {
-    res.status(500).json([]);
-  }
+  const products = await Product.find({}).limit(8);
+  res.json(products);
 });
 
-/* ============== NEW COLLECTIONS ============== */
 app.get("/newcollections", async (req, res) => {
-  try {
-    const products = await Product.find({})
-      .sort({ date: -1 })
-      .limit(8);
-    res.json(products);
-  } catch (err) {
-    res.status(500).json([]);
-  }
+  const products = await Product.find({})
+    .sort({ date: -1 })
+    .limit(8);
+  res.json(products);
 });
-
 
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () =>
-  console.log(`Server running on ${PORT} 🚀`)
-);
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT} 🚀`);
+});
