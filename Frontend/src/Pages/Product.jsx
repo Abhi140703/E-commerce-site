@@ -10,10 +10,10 @@ const Product = () => {
   const { all_product } = useContext(ShopContext);
   const { productId } = useParams();
 
-  // ✅ FIXED (_id is a string)
+  // (_id is a string)
   const product = all_product.find((e) => e._id === productId);
 
-  // ✅ CRITICAL GUARD (prevents white screen)
+  // CRITICAL GUARD (prevents white screen)
   if (!product) {
     return <div style={{ padding: "40px" }}>Loading product...</div>;
   }

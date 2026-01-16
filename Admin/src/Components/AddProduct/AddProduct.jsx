@@ -49,7 +49,7 @@ const AddProduct = () => {
       // 2️⃣ Prepare product
       const product = {
         name: productDetails.name,
-        category: productDetails.category,
+        category: productDetails.category.toLowerCase(),
         image: uploadData.image_url,
         new_price: Number(productDetails.new_price),
         old_price: Number(productDetails.old_price),
@@ -136,7 +136,6 @@ const AddProduct = () => {
           <option value="Women">Women</option>
           <option value="Men">Men</option>
           <option value="Kids">Kids</option>
-          <option value="Decoration">Decoration</option>
         </select>
       </div>
 
