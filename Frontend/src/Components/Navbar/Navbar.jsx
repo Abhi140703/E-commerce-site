@@ -41,23 +41,23 @@ const Navbar = () => {
         </li>
         <li
           onClick={() => {
-            SetMenu("mens");
+            SetMenu("men");
           }}
         >
-          <Link style={{ textDecoration: "none" }} to="/mens">
+          <Link style={{ textDecoration: "none" }} to="/men">
             Men
           </Link>
-          {menu === "mens" ? <hr /> : <></>}
+          {menu === "men" ? <hr /> : <></>}
         </li>
         <li
           onClick={() => {
-            SetMenu("womens");
+            SetMenu("women");
           }}
         >
-          <Link style={{ textDecoration: "none" }} to="/womens">
+          <Link style={{ textDecoration: "none" }} to="/women">
             Women
           </Link>
-          {menu === "womens" ? <hr /> : <></>}
+          {menu === "women" ? <hr /> : <></>}
         </li>
         <li
           onClick={() => {
