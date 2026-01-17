@@ -1,7 +1,7 @@
 import './App.css';
 import Navbar from './Components/Navbar/Navbar';
 import { Routes, Route } from 'react-router-dom';
-import LatestCollection from "./Components/Hero"
+import LatestCollection from "./Components/Hero/Hero.jsx"
 import Shop from './Pages/Shop';
 import ShopCategory from './Pages/ShopCategory';
 import Product from './Pages/Product';
