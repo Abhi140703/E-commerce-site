@@ -123,14 +123,12 @@ app.post("/login", async (req, res) => {
 });
 
 /* ================= GET CART ================= */
-app.post("/getcart", fetchUser, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-    res.json(user?.cart || {});
-  } catch {
-    res.status(500).json({});
-  }
-});
+app.post('/getcart',fetchUser,async(req,res)=>{
+    console.log("GetCart");
+    let userData = await User.findOne({_id:req.user.id});
+    res.json(userData.cartData);
+})
+
 
 /* ================= ADD TO CART ================= */
 app.post("/addtocart", fetchUser, async (req, res) => {
