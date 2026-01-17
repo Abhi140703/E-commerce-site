@@ -33,11 +33,15 @@
     gap: 40px;
     color: #252525;
     font-size: 18px;
+    text-decoration: none;
 }
 
 .footer-links li {
     cursor: pointer;
     transition: color 0.2s ease;
+}
+.footer-links a {
+   text-decoration: none;
 }
 
 .footer-links li:hover {
@@ -86,6 +90,9 @@
     background: #c7c7c7;
 }
 
+.footer-links{
+    text-decoration: none;
+}
 /* -------- RESPONSIVE -------- */
 
 @media (max-width: 800px) {

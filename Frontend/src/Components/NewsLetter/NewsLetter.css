@@ -122,6 +122,28 @@
         font-size: 13px;
     }
 }
+.newsletter-input {
+  display: flex;
+  gap: 10px;
+}
+
+.thank-you-message {
+  text-align: center;
+}
+
+.thank-you-message h2 {
+  color: #222;
+  margin-left: 13px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  font-size: 16px;
+}
+
+.thank-you-message p {
+  color: #555;
+  font-size: 16px;
+}
+
 
 @media (max-width: 500px) {
     .newsletter {
@@ -148,5 +170,13 @@
     .newsletter div button {
         width: 90px;
         font-size: 12px;
+    }
+    .thank-you-message p {
+        font-size: 13px;
+       
+    }
+    .thank-you-message h2 {
+        font-size: 13px;
+       margin-left: 13px;
     }
 }

@@ -135,6 +135,20 @@
     .image-container img{
         margin-bottom: 9px;
     }
+    .offers-message {
+  text-align: center;
+}
+
+.offers-message h2 {
+  color: #222;
+  margin-bottom: 10px;
+}
+
+.offers-message p {
+  color: #555;
+  font-size: 16px;
+}
+
   } 
   @media (max-width:500px) {
     .offers{
@@ -157,17 +171,11 @@
         font-size: 10px;
         margin-top: 12px;
     }
-  }    
-  .offers-message {
-  text-align: center;
+    .offers-message h2 {
+  font-size: 13px;
 }
-
-.offers-message h2 {
-  color: #222;
-  margin-bottom: 10px;
-}
-
 .offers-message p {
-  color: #555;
-  font-size: 16px;
+  font-size: 13px;
 }
+  }    
+  

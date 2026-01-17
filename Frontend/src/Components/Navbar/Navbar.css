@@ -85,6 +85,25 @@
 .nav-dropdown{
     display: none;
 }
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;          
+  cursor: pointer;
+}
+
+.nav-logo img {
+  width: 45px;       
+  height: auto;
+}
+
+.nav-logo p {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;         
+  color: #000;       
+}
+
 @media (max-width:1280px){
     .navbar{
         padding: 12px 50px;
