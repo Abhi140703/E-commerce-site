@@ -19,8 +19,10 @@ const Navbar = () => {
   return (
     <div className="navbar">
       <div className="nav-logo">
-        <img src={logo} alt="" />
-        <p>Newa Collection</p>
+        <Link to="/" style={{ textDecoration: "none" }}>
+          <img src={logo} alt="Newa Collection Logo" />
+          <p>Newa Collection</p>
+        </Link>
       </div>
       <img
         className="nav-dropdown"
