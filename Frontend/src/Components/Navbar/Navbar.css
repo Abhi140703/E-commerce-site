@@ -8,7 +8,13 @@
 .nav-logo{
     display: flex;
     align-items: center;
+    flex-direction: row;
     gap: 10px;
+}
+.nav-logo a {
+    display: flex;
+    flex-direction: row;
+    margin: 0px;
 }
 .nav-logo img{
     width: 100px;
@@ -109,10 +115,11 @@
         padding: 12px 50px;
     }
     .nav-logo img{
-        width: 40px;
+        width: 80px;
     }
     .nav-logo p{
-        font-size: 25px;
+        font-size: 15px;
+        margin: auto;
     }
     .nav-menu{
         gap: 30px;
