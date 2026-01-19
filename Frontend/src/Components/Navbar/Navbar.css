@@ -14,7 +14,7 @@
 .nav-logo a {
     display: flex;
     flex-direction: row;
-    margin: 0px;
+    margin: auto;
 }
 .nav-logo img{
     width: 100px;
@@ -99,7 +99,7 @@
 }
 
 .nav-logo img {
-  width: 45px;       
+  width: 90px;       
   height: auto;
 }
 
