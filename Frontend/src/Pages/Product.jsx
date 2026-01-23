@@ -5,6 +5,7 @@ import Breadcrum from "../Components/Breadcrum/Breadcrum";
 import ProductDisplay from "../Components/ProductDisplay/ProductDisplay";
 import DescriptionBox from "../Components/DescriptionBox/DescriptionBox";
 import RelatedProducts from "../Components/RelatedProducts/RelatedProducts";
+import LoadingPopup from "../Components/LoadingPopup";
 
 const Product = () => {
   const { all_product } = useContext(ShopContext);
@@ -13,9 +14,11 @@ const Product = () => {
   // (_id is a string)
   const product = all_product.find((e) => e._id === productId);
 
-  // CRITICAL GUARD (prevents white screen)
+  // SHOW POPUP WHILE PRODUCT LOADS
   if (!product) {
-    return <div style={{ padding: "40px" }}>Loading product...</div>;
+    return (
+      <LoadingPopup message="Please wait, product is loading. This may take a moment." />
+    );
   }
 
   return (
