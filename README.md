@@ -39,11 +39,8 @@ This project demonstrates real-world full-stack development practices including 
 
 ## 📂 Project Structure
 
-/client        → React frontend  
-/server        → Node.js & Express backend  
-/models        → MongoDB schemas  
-/routes        → API routes  
-/controllers  → Business logic  
+/Frontend        → React frontend  
+/Backend        → Node.js & Express backend  
 
 ---
 
@@ -62,9 +59,9 @@ git clone https://github.com/your-username/ecommerce-mern.git
 
 ###Install dependencies
 
-cd server
+cd 
 npm install
-cd ../client
+cd ../Frontend
 npm install
 
 
